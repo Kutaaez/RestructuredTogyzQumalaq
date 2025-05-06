@@ -3,14 +3,17 @@ package org.example.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.example.controller.GameController;
 
 public class MainView {
     private final GameController controller;
+    private final Stage stage;
     private final BorderPane root;
     private final HBox topRow;
     private final HBox bottomRow;
@@ -18,8 +21,9 @@ public class MainView {
     private final ScoreBoard opponentScore;
     private final TurnIndicator turnIndicator;
 
-    public MainView(GameController controller) {
+    public MainView(GameController controller, Stage stage) {
         this.controller = controller;
+        this.stage = stage;
         this.root = new BorderPane();
         this.topRow = new HBox(10);
         this.bottomRow = new HBox(10);
@@ -57,7 +61,7 @@ public class MainView {
         root.setRight(opponentScore.getNode());
         BorderPane.setAlignment(opponentScore.getNode(), Pos.CENTER_RIGHT);
 
-        // Центр — индикатор хода и кнопка «Новая игра»
+        // Центр — индикатор хода и кнопки
         VBox centerBox = new VBox(15);
         centerBox.setAlignment(Pos.CENTER);
         centerBox.getChildren().add(turnIndicator.getNode());
@@ -71,8 +75,21 @@ public class MainView {
                         "-fx-cursor: hand;"
         );
         newGameBtn.setOnAction(e -> controller.onNewGame());
-        centerBox.getChildren().add(newGameBtn);
 
+        Button backToMenuBtn = new Button("Назад в меню");
+        backToMenuBtn.setPrefWidth(140);
+        backToMenuBtn.setStyle(
+                "-fx-font-size: 14px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-background-radius: 5; " +
+                        "-fx-cursor: hand;"
+        );
+        backToMenuBtn.setOnAction(e -> {
+            MainMenuView menuView = new MainMenuView(stage);
+            stage.setScene(menuView.getScene());
+        });
+
+        centerBox.getChildren().addAll(newGameBtn, backToMenuBtn);
         root.setCenter(centerBox);
     }
 
