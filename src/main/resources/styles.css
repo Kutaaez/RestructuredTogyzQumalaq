@@ -1,0 +1,82 @@
+/* File: src/main/resources/styles.css */
+
+/* Общий фон приложения */
+.root {
+    -fx-background-color: linear-gradient(to bottom, #f0e4d7, #d8c3a5);
+}
+
+/* Общие стили для всех кнопок */
+.button {
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Класс для лунок */
+.hole-button {
+    -fx-background-radius: 30;
+    -fx-min-width: 60px;
+    -fx-min-height: 60px;
+    -fx-pref-width: 60px;
+    -fx-pref-height: 60px;
+    -fx-max-width: 60px;
+    -fx-max-height: 60px;
+    -fx-font-size: 16px;
+    -fx-text-fill: #333;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 5, 0.0, 0, 1);
+}
+
+/* Разные цвета для рядов игрока и оппонента */
+.hole-button.player {
+    -fx-background-color: #ffe4b5;
+}
+.hole-button.opponent {
+    -fx-background-color: #add8e6;
+}
+
+/* Анимация нажатия через pseudo-class */
+.hole-button:pressed {
+    -fx-scale-x: 0.9;
+    -fx-scale-y: 0.9;
+}
+
+/* Стили для панели очков (казан) */
+.score-board {
+    -fx-padding: 10;
+}
+.score-board > Label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+/* Стили индикатора хода */
+.turn-indicator {
+    -fx-padding: 10;
+}
+.turn-indicator > Label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+/* Стили для кнопки «Новая игра» */
+.new-game-button {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+}
+/* В src/main/resources/styles.css */
+.hole-button.red-tuzdyk {
+    -fx-background-color: transparent;
+    -fx-border-color: red;
+    -fx-border-width: 3px;
+}
+
+.hole-button .ball {
+    -fx-fill: blue;
+}
+
+.hole-button .ball.red {
+    -fx-fill: red;
+}
