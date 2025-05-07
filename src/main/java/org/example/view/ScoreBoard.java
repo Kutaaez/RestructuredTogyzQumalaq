@@ -2,99 +2,48 @@ package org.example.view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 public class ScoreBoard {
-    private final StackPane container;
-    private final StackPane titleContainer;
-    private final Label titleLabel;
-    private final GridPane ballsGrid;
-    private final StackPane stackedBalls;
-    private final Label scoreLabel;
+    private final VBox container;
+    private final Label player1Score;
+    private final Label player2Score;
 
-    public ScoreBoard(boolean playerSide) {
-        container = new StackPane();
+    public ScoreBoard() {
+        container = new VBox(10);
         container.setAlignment(Pos.CENTER);
-        container.setPrefSize(160, 120);
-        container.setMaxSize(160, 120);
         container.setPadding(new Insets(10));
-        container.getStyleClass().add("kazan-pane");
+        container.getStyleClass().add("score-board");
 
-        // Rectangular background
-        Rectangle background = new Rectangle(140, 100);
-        background.setArcWidth(16);
-        background.setArcHeight(16);
-        background.setFill(Color.web("#F9F0DF"));
-        background.getStyleClass().add("hole-background");
+        player1Score = new Label("0");
+        player1Score.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
+        player1Score.setPadding(new Insets(5));
 
-        // Title container
-        titleContainer = new StackPane();
-        titleContainer.setPrefSize(140, 20);
-        titleContainer.getStyleClass().add("title-container");
-        titleLabel = new Label(playerSide ? "Ваш казан" : "Казан оппонента");
-        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        titleLabel.setTextFill(Color.BLACK);
-        titleContainer.getChildren().add(titleLabel);
-        StackPane.setAlignment(titleContainer, Pos.TOP_CENTER);
-        StackPane.setMargin(titleContainer, new Insets(5));
+        player2Score = new Label("0");
+        player2Score.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;");
+        player2Score.setPadding(new Insets(5));
 
-        // Balls grid (2x5)
-        ballsGrid = new GridPane();
-        ballsGrid.setAlignment(Pos.CENTER);
-        ballsGrid.setHgap(6);
-        ballsGrid.setVgap(6);
+        Label label1 = new Label("Player 1 Kazan:");
+        label1.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
+        Label label2 = new Label("Player 2 Kazan:");
+        label2.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
 
-        // Stacked balls for counts >= 11
-        stackedBalls = new StackPane();
-        stackedBalls.setAlignment(Pos.CENTER);
+        HBox player1Box = new HBox(5, label1, player1Score);
+        player1Box.setAlignment(Pos.CENTER);
+        HBox player2Box = new HBox(5, label2, player2Score);
+        player2Box.setAlignment(Pos.CENTER);
 
-        // Score label
-        scoreLabel = new Label("0");
-        scoreLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        scoreLabel.setTextFill(Color.BLACK);
-        StackPane.setAlignment(scoreLabel, Pos.BOTTOM_CENTER);
-        StackPane.setMargin(scoreLabel, new Insets(0, 0, 5, 0));
-
-        container.getChildren().addAll(background, ballsGrid, stackedBalls, titleContainer, scoreLabel);
+        container.getChildren().addAll(player1Box, player2Box);
     }
 
-    public void setScore(int score) {
-        scoreLabel.setText(String.valueOf(score));
-        updateBalls(score);
+    public void setScores(int player1, int player2) {
+        player1Score.setText(String.valueOf(player1));
+        player2Score.setText(String.valueOf(player2));
     }
 
-    public Node getNode() {
+    public VBox getNode() {
         return container;
-    }
-
-    private void updateBalls(int count) {
-        ballsGrid.getChildren().clear();
-        stackedBalls.getChildren().clear();
-
-        int gridCount = Math.min(count, 10);
-        for (int i = 0; i < gridCount; i++) {
-            Circle ball = new Circle(10);
-            ball.getStyleClass().add("ball");
-            int row = i / 5;
-            int col = i % 5;
-            ballsGrid.add(ball, col, row);
-        }
-        if (count > 10) {
-            for (int i = 10; i < count; i++) {
-                Circle ball = new Circle(10);
-                ball.getStyleClass().add("ball");
-                ball.setTranslateX((i - 10) * 2);
-                ball.setTranslateY((i - 10) * 2);
-                stackedBalls.getChildren().add(ball);
-            }
-        }
     }
 }

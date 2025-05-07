@@ -24,7 +24,6 @@ public class GameController {
     public void setView(MainView view) {
         this.view = view;
         view.update();
-        // Если текущий игрок — бот, делаем его ход
         makeBotMoveIfNeeded();
     }
 
@@ -33,12 +32,10 @@ public class GameController {
             return;
         }
         int currentPlayer = model.getCurrentColor();
-        // Проверяем, что клик по правильной стороне
         boolean isPlayerSide = (currentPlayer == 0 && playerSide) || (currentPlayer == 1 && !playerSide);
         if (!isPlayerSide || players[currentPlayer] instanceof BotPlayer) {
             return;
         }
-        // Проверяем, что ход валиден
         if (model.makeMove(holeIndex, currentPlayer)) {
             view.update();
             makeBotMoveIfNeeded();
@@ -67,6 +64,10 @@ public class GameController {
 
     public int getCurrentPlayer() {
         return model.getCurrentColor();
+    }
+
+    public int getGameResult() {
+        return model.getGameResult();
     }
 
     public int getHoleCount(int holeIndex) {

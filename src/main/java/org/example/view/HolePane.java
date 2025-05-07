@@ -90,10 +90,6 @@ public class HolePane extends Pane {
         }
     }
 
-//    public void setDisable(boolean disable) {
-//        setDisable(disable);
-//        container.setOpacity(disable ? 0.6 : 1.0);
-//    }
 
     private void updateBalls(int count) {
         ballsGrid.getChildren().clear();
@@ -113,23 +109,14 @@ public class HolePane extends Pane {
                 ballsGrid.add(ball, col, row);
             }
             if (count > 10) {
-                int remainingCount = count - 10;  // Количество оставшихся шаров
-                for (int i = 0; i < remainingCount; i++) {
+                for (int i = 10; i < count; i++) {
                     Circle ball = new Circle(10);
                     ball.getStyleClass().add("ball");
-
-                    // Смещение по осям X и Y
-                    double translateX = i * 2;  // Смещение по оси X (по столбцам)
-
-                    // Небольшое наложение
-                    translateX += (i % 5) * 2;  // Дополнительное смещение для наложения
-
-                    // Добавляем шар в сетку и применяем смещение
-                    ballsGrid.add(ball, i % 5, i / 5);
-                    ball.setTranslateX(translateX);  // Применяем смещение по X
+                    ball.setTranslateX((i - 10) * 2);
+                    ball.setTranslateY((i - 10) * 2);
+                    stackedBalls.getChildren().add(ball);
                 }
             }
-
         }
     }
 

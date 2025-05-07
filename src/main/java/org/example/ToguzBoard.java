@@ -1,7 +1,6 @@
 package org.example;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ToguzBoard {
 
@@ -17,24 +16,6 @@ public class ToguzBoard {
             else
                 toguzFields[i] = 0;
         }
-    }
-
-    public void printPos() {
-        String S = YernarString.padLeft(Integer.toString(toguzFields[19]), 3, '\u00A0') + " ";
-
-        for (int i = 17; i > 8; i--)
-            if (toguzFields[i] == 255)
-                S = S + "  X";
-            else S = S + " " + YernarString.padLeft(Integer.toString(toguzFields[i]), 2, '\u00A0');
-        System.out.println(S);
-
-        S = "    ";
-        for (int i = 0; i < 9; i++)
-            if (toguzFields[i] == 255)
-                S = S + "  X";
-            else S = S + " " + YernarString.padLeft(Integer.toString(toguzFields[i]), 2, '\u00A0');
-        S = S + "    " + toguzFields[18];
-        System.out.println(S);
     }
 
     public boolean makeMove(int num, int playerColor) {
@@ -121,19 +102,6 @@ public class ToguzBoard {
         return moves;
     }
 
-    public void makeRandomMove() {
-        int color = toguzFields[22];
-        ArrayList<Integer> moves = getAvailableMoves(color);
-        if (moves.isEmpty()) {
-            System.out.println("No moves (rand)!");
-            System.out.println(Arrays.toString(toguzFields));
-            finished = true;
-            return;
-        }
-        int numMove = moves.get((int) (Math.random() * moves.size()));
-        makeMove(numMove, color);
-    }
-
     public void checkPos() {
         int whiteKum = 0, blackKum;
         for (int i = 0; i < 9; i++)
@@ -158,27 +126,8 @@ public class ToguzBoard {
         }
     }
 
-    public int playRandomGame() {
-        while (!finished)
-            makeRandomMove();
+    public int getGameResult() {
         return gameResult;
-    }
-
-    public String printNotation(boolean needPrint, boolean needHeader) {
-        String s = "";
-        if (needHeader)
-            s += "[Count \"" + Integer.toString(toguzFields[18]) + "-" + Integer.toString(toguzFields[19]) + "\"]" + "\n\n";
-
-        for (int i = 0; i < gameMoves.size(); i++) {
-            if (i == 0) s += "1. " + gameMoves.get(i);
-            else if (i % 2 == 0)
-                s += Integer.toString(i / 2 + 1) + ". " + gameMoves.get(i);
-            else s += " " + gameMoves.get(i) + "\n";
-        }
-
-        if (needPrint)
-            System.out.println(s);
-        return s;
     }
 
     public String getScore() {
