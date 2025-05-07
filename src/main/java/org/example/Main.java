@@ -1,3 +1,5 @@
+package org.example;
+
 import org.example.ToguzBoard;
 
 import java.util.Scanner;

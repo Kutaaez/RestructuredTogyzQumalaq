@@ -1,5 +1,6 @@
 package org.example.view;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -12,23 +13,23 @@ public class TurnIndicator {
     public TurnIndicator() {
         container = new HBox();
         container.setAlignment(Pos.CENTER);
-        container.setStyle("-fx-padding: 10;");
+        container.setPadding(new Insets(10));
+        container.getStyleClass().add("turn-indicator");
 
-        label = new Label("Ход: Ваш");
-        label.setStyle(
-                "-fx-font-size: 16px; " +
-                        "-fx-font-weight: bold;"
-        );
-
+        label = new Label("Ход игрока");
+        label.getStyleClass().add("turn-label");
         container.getChildren().add(label);
     }
 
-    /** @param player 0 — ваш ход, 1 — ход оппонента */
     public void setCurrentPlayer(int player) {
         if (player == 0) {
-            label.setText("Ход: Ваш");
+            label.setText("Ход игрока");
+            label.getStyleClass().remove("opponent-turn");
+            label.getStyleClass().add("player-turn");
         } else {
-            label.setText("Ход: Оппонент");
+            label.setText("Ход противника");
+            label.getStyleClass().remove("player-turn");
+            label.getStyleClass().add("opponent-turn");
         }
     }
 
