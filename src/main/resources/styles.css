@@ -42,3 +42,15 @@
 .win-overlay {
     -fx-alignment: center;
 }
+
+.modal-background {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    -fx-background-color: #F9F0DF;
+    -fx-border-color: #8B4513;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-padding: 20px;
+}

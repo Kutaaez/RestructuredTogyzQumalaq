@@ -7,15 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.example.StandardBoardFactory;
-import org.example.StandardGameStateChecker;
-import org.example.StandardMoveExecutor;
 import org.example.controller.GameController;
-import org.example.controller.HumanBotPlayerFactory;
-import org.example.controller.PlayerFactory;
-import org.example.controller.StandardMoveHandler;
-import org.example.controller.TwoHumanPlayerFactory;
-import org.example.ToguzBoard;
 
 /**
  * The main menu view for the Toguz Kumalak game, allowing users to select game modes.
@@ -66,29 +58,29 @@ public class MainMenuView {
      */
     private void startGame(boolean twoPlayers) {
         try {
-            // Create ToguzBoard with standard factory (from refactored ToguzBoard)
-            ToguzBoard model = new ToguzBoard(new StandardBoardFactory(), new StandardMoveExecutor(), new StandardGameStateChecker());
-            PlayerFactory playerFactory = twoPlayers ? new TwoHumanPlayerFactory() : new HumanBotPlayerFactory();
-            GameController controller = new GameController(playerFactory, new StandardMoveHandler(), model);
+            // Create a new controller and view
+            GameController controller = new GameController(twoPlayers);
             MainView view = new MainView(controller, stage);
             controller.setView(view);
 
-            Scene scene = new Scene(view.getRoot());
+            // Create a new scene with a fresh root
+            Scene scene = new Scene(view.getRoot(), 1200, 700);
             scene.getStylesheets().add(getStylesheet());
             stage.setScene(scene);
             stage.setMinWidth(1200);
             stage.setMinHeight(700);
             stage.sizeToScene();
+            stage.centerOnScreen();
         } catch (Exception e) {
-            // Log error (in production, show user-friendly message)
             System.err.println("Failed to start game: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     /**
      * Retrieves the path to the CSS stylesheet.
      *
-     * @return The external form of the CSS resource, or throws an exception if not found.
+     * @return The external form of the CSS resource.
      * @throws IllegalStateException if the stylesheet is not found.
      */
     private String getStylesheet() {

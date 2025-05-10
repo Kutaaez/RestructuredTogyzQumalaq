@@ -23,10 +23,13 @@ public class HolePane extends Pane {
     private final GridPane ballsGrid;
     private final StackPane stackedBalls;
     private final Label countLabel;
+    private final Label indexLabel;
+    private boolean isTuzdyk;
 
     public HolePane(int holeIndex, boolean playerSide) {
         this.holeIndex = holeIndex;
         this.playerSide = playerSide;
+        this.isTuzdyk = false;
 
         // Main container
         container = new StackPane();
@@ -60,12 +63,19 @@ public class HolePane extends Pane {
         // Count label
         countLabel = new Label("0");
         countLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        countLabel.setTextFill(Color.BLACK);
+        countLabel.setTextFill(Color.BLUE);
         StackPane.setAlignment(countLabel, Pos.BOTTOM_CENTER);
         StackPane.setMargin(countLabel, new Insets(0, 0, 5, 0));
 
+        // Index label
+        indexLabel = new Label(String.valueOf(holeIndex + 1));
+        indexLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+        indexLabel.setTextFill(Color.BLACK);
+        StackPane.setAlignment(indexLabel, Pos.TOP_CENTER);
+        StackPane.setMargin(indexLabel, new Insets(5, 0, 0, 0));
+
         // Assemble
-        container.getChildren().addAll(background, ballsGrid, stackedBalls, countLabel);
+        container.getChildren().addAll(background, ballsGrid, stackedBalls, countLabel, indexLabel);
         getChildren().add(container);
 
         // Click animation
@@ -78,22 +88,38 @@ public class HolePane extends Pane {
     }
 
     public void setCount(int count) {
-        countLabel.setText(String.valueOf(count));
+        countLabel.setText(isTuzdyk ? "" : String.valueOf(count));
         updateBalls(count);
     }
 
     public void setTuzdyk(boolean isTuz) {
+        this.isTuzdyk = isTuz;
         if (isTuz) {
             container.getStyleClass().add("red-tuzdyk");
+            countLabel.setText("");
+            ballsGrid.getChildren().clear();
+            stackedBalls.getChildren().clear();
+            // Add single red ball for tuzdyk
+            Circle redBall = new Circle(10);
+            redBall.getStyleClass().add("red-ball");
+            ballsGrid.add(redBall, 0, 0);
         } else {
             container.getStyleClass().remove("red-tuzdyk");
+            updateBalls(Integer.parseInt(countLabel.getText().isEmpty() ? "0" : countLabel.getText()));
         }
     }
-
 
     private void updateBalls(int count) {
         ballsGrid.getChildren().clear();
         stackedBalls.getChildren().clear();
+
+        if (isTuzdyk) {
+            // Add single red ball for tuzdyk
+            Circle redBall = new Circle(10);
+            redBall.getStyleClass().add("red-ball");
+            ballsGrid.add(redBall, 0, 0);
+            return;
+        }
 
         if (count == 255) {
             Circle redBall = new Circle(10);
@@ -108,15 +134,7 @@ public class HolePane extends Pane {
                 int col = i % 5;
                 ballsGrid.add(ball, col, row);
             }
-            if (count > 10) {
-                for (int i = 10; i < count; i++) {
-                    Circle ball = new Circle(10);
-                    ball.getStyleClass().add("ball");
-                    ball.setTranslateX((i - 10) * 2);
-                    ball.setTranslateY((i - 10) * 2);
-                    stackedBalls.getChildren().add(ball);
-                }
-            }
+            // No stacked balls for counts > 10
         }
     }
 

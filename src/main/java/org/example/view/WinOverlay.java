@@ -7,17 +7,21 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.example.controller.GameController;
+import org.example.entitites.BotPlayer;
 import javafx.stage.Stage;
+
 public class WinOverlay extends StackPane {
     private final Label resultLabel;
     private final Button newGameButton;
     private final Button mainMenuButton;
+    private final GameController controller;
 
     public WinOverlay(GameController controller, Stage stage) {
+        this.controller = controller;
         // Полупрозрачный фон, растягивается на весь родитель
         setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);");
         setVisible(false); // Изначально скрыт
-        setAlignment(Pos.CENTER);  // Ensure it is centered
+        setAlignment(Pos.CENTER); // Ensure it is centered
 
         // Контейнер для содержимого
         VBox content = new VBox(20);
@@ -35,7 +39,7 @@ public class WinOverlay extends StackPane {
         // Кнопка "Начать новую игру"
         newGameButton = new Button("Start New Game");
         newGameButton.setPrefWidth(150);
-        newGameButton.setStyle("-fx-font-size: 14px; -fx-background-color: #8B4513; -fx-text-fill: white; -fx-background-radius: 5;");
+        newGameButton.getStyleClass().add("reset-button");
         newGameButton.setOnAction(e -> {
             controller.onNewGame();
             setVisible(false);
@@ -44,7 +48,7 @@ public class WinOverlay extends StackPane {
         // Кнопка "На главную"
         mainMenuButton = new Button("Main Menu");
         mainMenuButton.setPrefWidth(150);
-        mainMenuButton.setStyle("-fx-font-size: 14px; -fx-background-color: #8B4513; -fx-text-fill: white; -fx-background-radius: 5;");
+        mainMenuButton.getStyleClass().add("exit-button");
         mainMenuButton.setOnAction(e -> {
             MainMenuView menuView = new MainMenuView(stage);
             stage.setScene(menuView.getScene());
@@ -56,10 +60,11 @@ public class WinOverlay extends StackPane {
     }
 
     public void showResult(int result) {
+        boolean isBotGame = controller.getPlayers()[1] instanceof BotPlayer;
         if (result == 1) {
-            resultLabel.setText("Player 1 Wins!");
+            resultLabel.setText(isBotGame ? "Player Wins!" : "Player 1 Wins!");
         } else if (result == -1) {
-            resultLabel.setText("Player 2 Wins!");
+            resultLabel.setText(isBotGame ? "Bot Wins!" : "Player 2 Wins!");
         } else if (result == 0) {
             resultLabel.setText("Draw!");
         }

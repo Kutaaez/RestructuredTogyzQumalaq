@@ -2,62 +2,63 @@ package org.example.view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import org.example.controller.GameController;
+import org.example.entitites.BotPlayer;
 
 public class PlayerPanel {
-    private final VBox container;
-    private final Label player1ScoreLabel;
-    private final Label player2ScoreLabel;
+    private final VBox node;
+    private final Label playerScore;
+    private final Label opponentScore;
     private final Label currentPlayerLabel;
+    private final Label playerLabel;
+    private final Label opponentLabel;
 
-    public PlayerPanel() {
-        container = new VBox(10);
-        container.setAlignment(Pos.TOP_CENTER);
-        container.setPadding(new Insets(10));
-        container.setPrefWidth(200);
-        container.setMaxWidth(200);
-        container.getStyleClass().add("player-panel");
+    public PlayerPanel(GameController controller) {
+        node = new VBox(10);
+        node.setAlignment(Pos.CENTER);
+        node.setPadding(new Insets(10));
+        node.getStyleClass().add("score-board");
 
-        Label title = new Label("Игроки");
-        title.setFont(Font.font("System", FontWeight.BOLD, 16));
-        title.setTextFill(Color.WHITE);
+        // Determine player names based on game mode
+        boolean isBotGame = controller.getPlayers()[1] instanceof BotPlayer;
+        playerLabel = new Label(isBotGame ? "Player" : "Player 1");
+        playerLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
 
-        player1ScoreLabel = new Label("Player1: 0");
-        player1ScoreLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        player1ScoreLabel.getStyleClass().add("score-label");
+        playerScore = new Label("0");
+        playerScore.setFont(Font.font("System", FontWeight.NORMAL, 14));
 
-        player2ScoreLabel = new Label("Player2: 0");
-        player2ScoreLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        player2ScoreLabel.getStyleClass().add("score-label");
+        opponentLabel = new Label(isBotGame ? "Bot" : "Player 2");
+        opponentLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
 
-        currentPlayerLabel = new Label("Текущий: Player1");
+        opponentScore = new Label("0");
+        opponentScore.setFont(Font.font("System", FontWeight.NORMAL, 14));
+
+        currentPlayerLabel = new Label("Current: " + (isBotGame ? "Player" : "Player 1"));
         currentPlayerLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        currentPlayerLabel.getStyleClass().add("current-player");
 
-        container.getChildren().addAll(title, player1ScoreLabel, player2ScoreLabel, currentPlayerLabel);
+        node.getChildren().addAll(playerLabel, playerScore, opponentLabel, opponentScore, currentPlayerLabel);
     }
 
-    public void setScores(int player1Score, int player2Score) {
-        player1ScoreLabel.setText("Player1: " + player1Score);
-        player2ScoreLabel.setText("Player2: " + player2Score);
+    public void setScores(int playerKazan, int opponentKazan) {
+        playerScore.setText(String.valueOf(playerKazan));
+        opponentScore.setText(String.valueOf(opponentKazan));
     }
 
-    public void setCurrentPlayer(int player) {
-        currentPlayerLabel.setText("Текущий: " + (player == 0 ? "Player1" : "Player2"));
-        if (player == 0) {
-            currentPlayerLabel.getStyleClass().remove("opponent-turn");
-            currentPlayerLabel.getStyleClass().add("player-turn");
+    public void setCurrentPlayer(int currentPlayer) {
+        boolean isBotGame = opponentLabel.getText().equals("Bot");
+        if (isBotGame) {
+            currentPlayerLabel.setText(currentPlayer == 0 ? "Current: Player" : "Current: Bot");
         } else {
-            currentPlayerLabel.getStyleClass().remove("player-turn");
-            currentPlayerLabel.getStyleClass().add("opponent-turn");
+            currentPlayerLabel.setText(currentPlayer == 0 ? "Current: Player 1" : "Current: Player 2");
         }
     }
 
-    public VBox getNode() {
-        return container;
+    public Node getNode() {
+        return node;
     }
 }

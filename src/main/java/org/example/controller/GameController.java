@@ -1,36 +1,65 @@
 package org.example.controller;
 
+import org.example.entitites.BotPlayer;
 import org.example.ToguzBoard;
 import org.example.view.MainView;
 import org.example.entitites.Player;
+import org.example.entitites.HumanPlayer;
 
 public class GameController {
+
     private final ToguzBoard model;
     private MainView view;
     private final Player[] players;
-    private final MoveHandler moveHandler;
 
-    public GameController(PlayerFactory playerFactory, MoveHandler moveHandler, ToguzBoard model) {
-        this.model = model;
-        this.players = playerFactory.createPlayers();
-        this.moveHandler = moveHandler;
+    public GameController(boolean twoPlayers) {
+        this.model = new ToguzBoard();
+        if (twoPlayers) {
+            this.players = new Player[]{new HumanPlayer(0), new HumanPlayer(1)};
+        } else {
+            this.players = new Player[]{new HumanPlayer(0), new BotPlayer(1)};
+        }
     }
 
     public void setView(MainView view) {
         this.view = view;
         view.update();
-        moveHandler.handleBotMove(this);
+        makeBotMoveIfNeeded();
     }
 
     public void onHoleClicked(int holeIndex, boolean playerSide) {
-        moveHandler.handleHumanMove(this, holeIndex, playerSide);
-        view.update();
+        if (model.isGameFinished()) {
+            return;
+        }
+        int currentPlayer = model.getCurrentColor();
+        boolean isPlayerSide = (currentPlayer == 0 && playerSide) || (currentPlayer == 1 && !playerSide);
+        if (!isPlayerSide || players[currentPlayer] instanceof BotPlayer) {
+            return;
+        }
+        if (model.makeMove(holeIndex, currentPlayer)) {
+            view.update();
+            makeBotMoveIfNeeded();
+        }
+    }
+
+    private void makeBotMoveIfNeeded() {
+        if (model.isGameFinished()) {
+            return;
+        }
+        int currentPlayer = model.getCurrentColor();
+        if (players[currentPlayer] instanceof BotPlayer) {
+            int move = players[currentPlayer].makeMove(model);
+            if (move != -1) {
+                model.makeMove(move, currentPlayer);
+                view.update();
+            }
+        }
     }
 
     public void onNewGame() {
         model.reset();
         view.update();
-        moveHandler.handleBotMove(this);
+        makeBotMoveIfNeeded();
     }
 
     public int getCurrentPlayer() {
@@ -63,9 +92,5 @@ public class GameController {
 
     public Player[] getPlayers() {
         return players;
-    }
-
-    public ToguzBoard getModel() {
-        return model;
     }
 }

@@ -3,8 +3,8 @@ package org.example.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -26,15 +26,12 @@ public class MainView {
         this.controller = controller;
         this.stage = stage;
         this.root = new BorderPane();
-        this.topRow = new HBox(15);
-        this.bottomRow = new HBox(15);
-        this.kazan = new ScoreBoard();
-        this.playerPanel = new PlayerPanel();
+        this.topRow = new HBox(10);
+        this.bottomRow = new HBox(10);
+        this.kazan = new ScoreBoard(controller);
+        this.playerPanel = new PlayerPanel(controller);
         this.winOverlay = new WinOverlay(controller, stage);
         buildLayout();
-        // Установить минимальный размер сцены
-        stage.setMinWidth(1200);
-        stage.setMinHeight(700);
     }
 
     private void buildLayout() {
@@ -59,24 +56,33 @@ public class MainView {
             pane.setOnMouseClicked(e -> controller.onHoleClicked(pane.getHoleIndex(), true));
             bottomRow.getChildren().add(pane);
         }
+        root.setBottom(bottomRow);
 
-        // Center — kazan
+        // Center — kazan and winOverlay
+        StackPane centerStack = new StackPane();
         VBox centerBox = new VBox(15);
         centerBox.setAlignment(Pos.CENTER);
         centerBox.getChildren().add(kazan.getNode());
-        root.setCenter(centerBox);
+        centerStack.getChildren().addAll(centerBox, winOverlay);
+        StackPane.setAlignment(centerBox, Pos.CENTER);
+        StackPane.setAlignment(winOverlay, Pos.CENTER);
+        winOverlay.setVisible(false);
+        root.setCenter(centerStack);
 
         // Right — player panel and buttons
         VBox rightBox = new VBox(15);
         rightBox.setAlignment(Pos.TOP_CENTER);
         rightBox.setPadding(new Insets(15));
-
         rightBox.getChildren().add(playerPanel.getNode());
 
         Button resetBtn = new Button("Reset");
         resetBtn.setPrefWidth(120);
         resetBtn.getStyleClass().add("reset-button");
-        resetBtn.setOnAction(e -> controller.onNewGame());
+        resetBtn.setOnAction(e -> {
+            ConfirmModal modal = new ConfirmModal("Start New Game", "Are you sure you want to start a new game?");
+            modal.setOnConfirm(() -> controller.onNewGame());
+            modal.show();
+        });
 
         Button exitBtn = new Button("Exit");
         exitBtn.setPrefWidth(120);
@@ -88,30 +94,20 @@ public class MainView {
 
         rightBox.getChildren().addAll(resetBtn, exitBtn);
         root.setRight(rightBox);
-
-        // Bottom — player's holes
-        bottomRow.setAlignment(Pos.CENTER);
-        root.setBottom(bottomRow);
-
-        // Add win overlay
-        root.getChildren().add(winOverlay);
-
-        // Center winOverlay on top of other nodes
-        StackPane.setAlignment(winOverlay, Pos.CENTER);  // Centering the overlay
-        winOverlay.toFront();  // Bringing overlay to the front
     }
-
 
     public void update() {
         int currentPlayer = controller.getCurrentPlayer();
         for (Node node : topRow.getChildren()) {
             HolePane hp = (HolePane) node;
+            hp.setTuzdyk(false); // Reset tuzdyk state
             hp.setCount(controller.getOpponentHoleCount(hp.getHoleIndex()));
             hp.setTuzdyk(controller.getTuzdyk(0) == hp.getHoleIndex());
             hp.setDisable(currentPlayer != 1);
         }
         for (Node node : bottomRow.getChildren()) {
             HolePane hp = (HolePane) node;
+            hp.setTuzdyk(false); // Reset tuzdyk state
             hp.setCount(controller.getHoleCount(hp.getHoleIndex()));
             hp.setTuzdyk(controller.getTuzdyk(1) == hp.getHoleIndex());
             hp.setDisable(currentPlayer != 0);
@@ -120,7 +116,6 @@ public class MainView {
         playerPanel.setScores(controller.getKazan(0), controller.getKazan(1));
         playerPanel.setCurrentPlayer(currentPlayer);
 
-        // Show win overlay if game is finished
         if (controller.isFinished()) {
             winOverlay.showResult(controller.getGameResult());
         } else {
