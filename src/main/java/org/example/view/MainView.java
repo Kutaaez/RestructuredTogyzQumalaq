@@ -88,7 +88,7 @@ public class MainView {
         resetBtn.setPrefWidth(120);
         resetBtn.getStyleClass().add("reset-button");
         resetBtn.setOnAction(e -> {
-            ConfirmModal modal = new ConfirmModal("Start New Game", "Are you sure you want to start a new game?");
+            ConfirmModal modal = new ConfirmModal("Start New Game", "Are you sure you want\n to start a new game?");
             modal.setOnConfirm(() -> controller.onNewGame());
             modal.show();
         });
@@ -97,8 +97,12 @@ public class MainView {
         exitBtn.setPrefWidth(120);
         exitBtn.getStyleClass().add("exit-button");
         exitBtn.setOnAction(e -> {
-            MainMenuView menuView = new MainMenuView(stage);
-            stage.setScene(menuView.getScene());
+            ConfirmModal modal = new ConfirmModal("Exit Game", "Are you sure you want to exit\n to the main menu?");
+            modal.setOnConfirm(() -> {
+                MainMenuView menuView = new MainMenuView(stage);
+                stage.setScene(menuView.getScene());
+            });
+            modal.show();
         });
 
         rightBox.getChildren().addAll(resetBtn, exitBtn);

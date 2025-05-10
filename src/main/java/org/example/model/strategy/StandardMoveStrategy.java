@@ -1,64 +1,57 @@
 package org.example.model.strategy;
 
-import org.example.model.core.BoardState;
+import org.example.model.core.*;
+import org.example.model.rules.IRules;
 
 public class StandardMoveStrategy implements IMoveStrategy {
+    private final IRules rules;
+
+    public StandardMoveStrategy(IRules rules) {
+        this.rules = rules;
+    }
+
     @Override
     public boolean executeMove(BoardState boardState, int hole, int playerColor) {
-        int idx = hole + 9 * playerColor - 1;
-        int seeds = boardState.getHoleCount(idx);
+        int idx = hole + Holes.HOLES_PER_PLAYER * playerColor - 1;
+        if (hole < 1 || hole > Holes.HOLES_PER_PLAYER ||
+                boardState.getHoles().getSeedCount(idx) == 0 ||
+                boardState.getHoles().isTuzdyk(idx)) {
+            return false;
+        }
 
-        // Sowing seeds
+        int seeds = boardState.getHoles().getSeedCount(idx);
+        int sow = sowSeeds(boardState, idx, seeds);
+        idx = (idx + sow) % Holes.TOTAL_HOLES;
+
+        if (rules.canFormTuzdyk(idx, playerColor, boardState)) {
+            rules.applyTuzdyk(idx, playerColor, boardState);
+        } else if (rules.canCapture(idx, playerColor, boardState)) {
+            rules.applyCapture(idx, playerColor, boardState);
+        }
+
+        boardState.getCurrentPlayer().switchPlayer();
+        return true;
+    }
+
+    private int sowSeeds(BoardState boardState, int idx, int seeds) {
         int sow;
         if (seeds == 1) {
-            boardState.setHoleCount(idx, 0);
+            boardState.getHoles().setSeedCount(idx, 0);
             sow = 1;
         } else {
-            boardState.setHoleCount(idx, 1);
+            boardState.getHoles().setSeedCount(idx, 1);
             sow = seeds - 1;
         }
 
-        // Distribute seeds
         for (int i = 0; i < sow; i++) {
-            idx = (idx + 1) % 18; // Only real holes 0–17
-            if (boardState.getHoleCount(idx) == 255) {
-                // Tuzdyk: Go to opponent's kazan
-                int kazanIndex = (idx > 8 ? 0 : 1);
-                boardState.addToKazan(kazanIndex, 1);
+            idx = (idx + 1) % Holes.TOTAL_HOLES;
+            if (boardState.getHoles().isTuzdyk(idx)) {
+                int kazanIndex = (idx >= Holes.HOLES_PER_PLAYER) ? Kazans.WHITE_KAZAN : Kazans.BLACK_KAZAN;
+                boardState.getKazans().addToKazan(kazanIndex, 1);
             } else {
-                boardState.incrementHoleCount(idx);
+                boardState.getHoles().setSeedCount(idx, boardState.getHoles().getSeedCount(idx) + 1);
             }
         }
-
-        // Check for tuzdyk (3 seeds in opponent's hole)
-        if (boardState.getHoleCount(idx) == 3) {
-            // White player (0): Holes 9–16
-            if (playerColor == 0 && idx > 8 && idx < 17 && boardState.getTuzdyk(0) == 0 && boardState.getTuzdyk(1) != idx - 8) {
-                boardState.addToKazan(0, 3);
-                boardState.setHoleCount(idx, 255);
-                boardState.setTuzdyk(0, idx - 8);
-            }
-            // Black player (1): Holes 0–7
-            else if (playerColor == 1 && idx < 8 && boardState.getTuzdyk(1) == 0 && boardState.getTuzdyk(0) != idx + 1) {
-                boardState.addToKazan(1, 3);
-                boardState.setHoleCount(idx, 255);
-                boardState.setTuzdyk(1, idx + 1);
-            }
-        }
-
-        // Capture even number of seeds
-        if (boardState.getHoleCount(idx) % 2 == 0 && boardState.getHoleCount(idx) != 255) {
-            if (playerColor == 0 && idx > 8) {
-                boardState.addToKazan(0, boardState.getHoleCount(idx));
-                boardState.setHoleCount(idx, 0);
-            } else if (playerColor == 1 && idx < 9) {
-                boardState.addToKazan(1, boardState.getHoleCount(idx));
-                boardState.setHoleCount(idx, 0);
-            }
-        }
-
-        // Switch player
-        boardState.setCurrentPlayer(1 - boardState.getCurrentPlayer());
-        return true;
+        return sow;
     }
 }

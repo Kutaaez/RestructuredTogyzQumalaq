@@ -27,7 +27,7 @@ public class ConfirmModal {
         content.getStyleClass().add("modal-content");
 
         Label messageLabel = new Label(message);
-        messageLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #333333;");
+        messageLabel.getStyleClass().add("modal-label");
 
         Button confirmButton = new Button("Confirm");
         confirmButton.setPrefWidth(100);

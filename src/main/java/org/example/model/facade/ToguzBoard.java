@@ -1,6 +1,6 @@
 package org.example.model.facade;
 
-import org.example.model.core.BoardState;
+import org.example.model.core.*;
 import org.example.model.factory.MoveStrategyFactory;
 import org.example.model.observer.IStateObserver;
 import org.example.model.state.IGameState;
@@ -23,20 +23,28 @@ public class ToguzBoard {
         this.observers = new ArrayList<>();
     }
 
-    public boolean makeMove(int hole, int playerColor) {
-        if (gameState.isFinished() || !isValidMove(hole, playerColor)) {
+    public boolean executeMove(int hole, int playerColor) {
+        if (gameState.isFinished() || playerColor != boardState.getCurrentPlayer().getCurrentPlayer()) {
             return false;
         }
-        boolean moveSuccessful = moveStrategy.executeMove(boardState, hole, playerColor);
-        if (moveSuccessful) {
+        boolean success = moveStrategy.executeMove(boardState, hole, playerColor);
+        if (success) {
             gameState.checkGameState();
             notifyObservers();
         }
-        return moveSuccessful;
+        return success;
     }
 
     public List<Integer> getAvailableMoves(int playerColor) {
-        return boardState.getAvailableMoves(playerColor);
+        List<Integer> moves = new ArrayList<>();
+        int start = (playerColor == CurrentPlayer.WHITE_PLAYER) ? 0 : Holes.HOLES_PER_PLAYER;
+        int end = start + Holes.HOLES_PER_PLAYER - 1;
+        for (int i = start; i <= end; i++) {
+            if (boardState.getHoles().getSeedCount(i) > 0 && !boardState.getHoles().isTuzdyk(i)) {
+                moves.add(i - start + 1);
+            }
+        }
+        return moves;
     }
 
     public int getGameResult() {
@@ -44,11 +52,12 @@ public class ToguzBoard {
     }
 
     public String getScore() {
-        return boardState.getKazan(0) + " - " + boardState.getKazan(1);
+        return boardState.getKazans().getKazan(CurrentPlayer.WHITE_PLAYER) + " - " +
+                boardState.getKazans().getKazan(CurrentPlayer.BLACK_PLAYER);
     }
 
     public int getCurrentColor() {
-        return boardState.getCurrentPlayer();
+        return boardState.getCurrentPlayer().getCurrentPlayer();
     }
 
     public boolean isGameFinished() {
@@ -56,31 +65,25 @@ public class ToguzBoard {
     }
 
     public int getTuzdyk(int playerColor) {
-        if (playerColor < 0 || playerColor > 1) {
-            throw new IllegalArgumentException("Player color must be 0 or 1");
-        }
-        return boardState.getTuzdyk(playerColor);
+        return boardState.getTuzdyks().getTuzdyk(playerColor);
     }
 
     public int getKazan(int playerColor) {
-        if (playerColor < 0 || playerColor > 1) {
-            throw new IllegalArgumentException("Player color must be 0 or 1");
-        }
-        return boardState.getKazan(playerColor);
-    }
-
-    public int getOpponentHoleCount(int hole) {
-        if (hole < 1 || hole > 9) {
-            throw new IllegalArgumentException("Hole index must be 1..9");
-        }
-        return boardState.getHoleCount(9 + (hole - 1));
+        return boardState.getKazans().getKazan(playerColor);
     }
 
     public int getHoleCount(int hole) {
-        if (hole < 1 || hole > 9) {
-            throw new IllegalArgumentException("Hole index must be 1..9");
+        if (hole < 1 || hole > Holes.HOLES_PER_PLAYER) {
+            throw new IllegalArgumentException("Hole index must be 1.." + Holes.HOLES_PER_PLAYER);
         }
-        return boardState.getHoleCount(hole - 1);
+        return boardState.getHoles().getSeedCount(hole - 1);
+    }
+
+    public int getOpponentHoleCount(int hole) {
+        if (hole < 1 || hole > Holes.HOLES_PER_PLAYER) {
+            throw new IllegalArgumentException("Hole index must be 1.." + Holes.HOLES_PER_PLAYER);
+        }
+        return boardState.getHoles().getSeedCount(hole - 1 + Holes.HOLES_PER_PLAYER);
     }
 
     public void reset() {
@@ -93,21 +96,9 @@ public class ToguzBoard {
         observers.add(observer);
     }
 
-    public void removeObserver(IStateObserver observer) {
-        observers.remove(observer);
-    }
-
     private void notifyObservers() {
         for (IStateObserver observer : observers) {
             observer.onStateChanged();
         }
-    }
-
-    private boolean isValidMove(int hole, int playerColor) {
-        if (playerColor != boardState.getCurrentPlayer()) {
-            return false;
-        }
-        int idx = hole + 9 * playerColor - 1;
-        return hole >= 1 && hole <= 9 && boardState.getHoleCount(idx) > 0 && boardState.getHoleCount(idx) != 255;
     }
 }

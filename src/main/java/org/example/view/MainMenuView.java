@@ -40,8 +40,13 @@ public class MainMenuView {
         Button exitButton = new Button("Exit");
         exitButton.getStyleClass().add("exit-button");
         exitButton.setPrefWidth(200);
-        exitButton.setOnAction(e -> stage.close());
-
+        exitButton.setOnAction(e -> {
+            ConfirmModal modal = new ConfirmModal("Exit Game", "Are you sure you want to exit\n to the main menu?");
+            modal.setOnConfirm(() -> {
+                stage.close();
+            });
+            modal.show();
+        });
         // Assemble
         root.getChildren().addAll(titleLabel, singlePlayerButton, twoPlayerButton, exitButton);
 

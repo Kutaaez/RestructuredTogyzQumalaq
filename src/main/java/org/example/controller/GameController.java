@@ -1,8 +1,10 @@
 package org.example.controller;
 
-import org.example.entitites.BotPlayer;
-import org.example.entitites.HumanPlayer;
 import org.example.entitites.IPlayer;
+import org.example.entitites.PlayerFactory;
+import org.example.model.command.ICommand;
+import org.example.model.command.MoveCommand;
+import org.example.model.command.ResetCommand;
 import org.example.model.facade.ToguzBoard;
 import org.example.model.observer.IStateObserver;
 import org.example.view.MainView;
@@ -11,18 +13,19 @@ public class GameController implements IStateObserver {
     private final ToguzBoard model;
     private MainView view;
     private final IPlayer[] players;
+    private final BotMoveScheduler botMoveScheduler;
 
     public GameController(boolean twoPlayers) {
         this.model = new ToguzBoard();
-        this.players = twoPlayers
-                ? new IPlayer[]{new HumanPlayer(0), new HumanPlayer(1)}
-                : new IPlayer[]{new HumanPlayer(0), new BotPlayer(1)};
+        this.players = PlayerFactory.createPlayers(twoPlayers);
+        this.botMoveScheduler = new BotMoveScheduler();
         this.model.addObserver(this);
     }
 
     public void setView(MainView view) {
         this.view = view;
-        onStateChanged(); // Initial update
+        view.update();
+        botMoveScheduler.scheduleBotMove(this, model, players);
     }
 
     public void onHoleClicked(int holeIndex, boolean playerSide) {
@@ -31,27 +34,21 @@ public class GameController implements IStateObserver {
         }
         int currentPlayer = model.getCurrentColor();
         boolean isPlayerSide = (currentPlayer == 0 && playerSide) || (currentPlayer == 1 && !playerSide);
-        if (!isPlayerSide || players[currentPlayer] instanceof BotPlayer) {
+        if (!isPlayerSide || players[currentPlayer] instanceof org.example.entitites.BotPlayer) {
             return;
         }
-        model.makeMove(holeIndex, currentPlayer);
-    }
-
-    private void makeBotMoveIfNeeded() {
-        if (model.isGameFinished()) {
-            return;
-        }
-        int currentPlayer = model.getCurrentColor();
-        if (players[currentPlayer] instanceof BotPlayer) {
-            int move = players[currentPlayer].makeMove(model);
-            if (move != -1) {
-                model.makeMove(move, currentPlayer);
-            }
+        ICommand command = new MoveCommand(model, holeIndex, currentPlayer);
+        if (command.execute()) {
+            view.update();
+            botMoveScheduler.scheduleBotMove(this, model, players);
         }
     }
 
     public void onNewGame() {
-        model.reset();
+        ICommand command = new ResetCommand(model);
+        command.execute();
+        view.update();
+        botMoveScheduler.scheduleBotMove(this, model, players);
     }
 
     public int getCurrentPlayer() {
@@ -90,7 +87,6 @@ public class GameController implements IStateObserver {
     public void onStateChanged() {
         if (view != null) {
             view.update();
-            makeBotMoveIfNeeded();
         }
     }
 }
