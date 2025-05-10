@@ -1,15 +1,16 @@
 package org.example.controller;
 
-import org.example.entitites.IPlayer;
-import org.example.entitites.PlayerFactory;
-import org.example.model.command.ICommand;
-import org.example.model.command.MoveCommand;
-import org.example.model.command.ResetCommand;
-import org.example.model.facade.ToguzBoard;
-import org.example.model.observer.IStateObserver;
-import org.example.view.MainView;
+import org.example.domain.player.BotPlayer;
+import org.example.domain.player.IPlayer;
+import org.example.domain.player.PlayerFactory;
+import org.example.domain.command.ICommand;
+import org.example.domain.command.MoveCommand;
+import org.example.domain.command.ResetCommand;
+import org.example.domain.facade.ToguzBoard;
+import org.example.domain.observer.IStateObserver;
+import org.example.view.screens.MainView;
 
-public class GameController implements IStateObserver {
+public class GameController implements IGameController,     IStateObserver {
     private final ToguzBoard model;
     private MainView view;
     private final IPlayer[] players;
@@ -34,7 +35,7 @@ public class GameController implements IStateObserver {
         }
         int currentPlayer = model.getCurrentColor();
         boolean isPlayerSide = (currentPlayer == 0 && playerSide) || (currentPlayer == 1 && !playerSide);
-        if (!isPlayerSide || players[currentPlayer] instanceof org.example.entitites.BotPlayer) {
+        if (!isPlayerSide || players[currentPlayer] instanceof BotPlayer) {
             return;
         }
         ICommand command = new MoveCommand(model, holeIndex, currentPlayer);
