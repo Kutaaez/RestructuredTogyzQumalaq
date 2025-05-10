@@ -1,8 +1,8 @@
 package org.example.entitites;
 
-import org.example.ToguzBoard;
+import org.example.model.facade.ToguzBoard;
 
-public class HumanPlayer implements Player {
+public class HumanPlayer implements IPlayer {
     private final int color;
 
     public HumanPlayer(int color) {
@@ -11,8 +11,8 @@ public class HumanPlayer implements Player {
 
     @Override
     public int makeMove(ToguzBoard board) {
-        // Ход определяется через UI (GameController), поэтому возвращаем -1
-        // Реальный ход будет передан через GameController
+        // Move is determined via UI (GameController), so return -1
+        // Actual move is passed through GameController
         return -1;
     }
 

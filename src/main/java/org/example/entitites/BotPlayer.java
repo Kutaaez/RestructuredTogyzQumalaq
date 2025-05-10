@@ -1,6 +1,6 @@
 package org.example.entitites;
 
-import org.example.ToguzBoard;
+import org.example.model.facade.ToguzBoard;
 
 import java.util.List;
 import java.util.Random;
@@ -8,7 +8,7 @@ import java.util.Random;
 /**
  * A bot player that makes random moves in the Toguz Kumalak game.
  */
-public class BotPlayer implements Player {
+public class BotPlayer implements IPlayer {
     private final int color;
     private final Random random;
 

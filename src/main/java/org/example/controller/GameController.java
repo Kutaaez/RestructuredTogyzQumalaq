@@ -1,30 +1,28 @@
 package org.example.controller;
 
 import org.example.entitites.BotPlayer;
-import org.example.ToguzBoard;
-import org.example.view.MainView;
-import org.example.entitites.Player;
 import org.example.entitites.HumanPlayer;
+import org.example.entitites.IPlayer;
+import org.example.model.facade.ToguzBoard;
+import org.example.model.observer.IStateObserver;
+import org.example.view.MainView;
 
-public class GameController {
-
+public class GameController implements IStateObserver {
     private final ToguzBoard model;
     private MainView view;
-    private final Player[] players;
+    private final IPlayer[] players;
 
     public GameController(boolean twoPlayers) {
         this.model = new ToguzBoard();
-        if (twoPlayers) {
-            this.players = new Player[]{new HumanPlayer(0), new HumanPlayer(1)};
-        } else {
-            this.players = new Player[]{new HumanPlayer(0), new BotPlayer(1)};
-        }
+        this.players = twoPlayers
+                ? new IPlayer[]{new HumanPlayer(0), new HumanPlayer(1)}
+                : new IPlayer[]{new HumanPlayer(0), new BotPlayer(1)};
+        this.model.addObserver(this);
     }
 
     public void setView(MainView view) {
         this.view = view;
-        view.update();
-        makeBotMoveIfNeeded();
+        onStateChanged(); // Initial update
     }
 
     public void onHoleClicked(int holeIndex, boolean playerSide) {
@@ -36,10 +34,7 @@ public class GameController {
         if (!isPlayerSide || players[currentPlayer] instanceof BotPlayer) {
             return;
         }
-        if (model.makeMove(holeIndex, currentPlayer)) {
-            view.update();
-            makeBotMoveIfNeeded();
-        }
+        model.makeMove(holeIndex, currentPlayer);
     }
 
     private void makeBotMoveIfNeeded() {
@@ -51,15 +46,12 @@ public class GameController {
             int move = players[currentPlayer].makeMove(model);
             if (move != -1) {
                 model.makeMove(move, currentPlayer);
-                view.update();
             }
         }
     }
 
     public void onNewGame() {
         model.reset();
-        view.update();
-        makeBotMoveIfNeeded();
     }
 
     public int getCurrentPlayer() {
@@ -90,7 +82,15 @@ public class GameController {
         return model.isGameFinished();
     }
 
-    public Player[] getPlayers() {
+    public IPlayer[] getPlayers() {
         return players;
+    }
+
+    @Override
+    public void onStateChanged() {
+        if (view != null) {
+            view.update();
+            makeBotMoveIfNeeded();
+        }
     }
 }

@@ -15,10 +15,11 @@ import org.example.controller.GameController;
 public class MainView {
     private final GameController controller;
     private final Stage stage;
+    private final Scene scene;
     private final BorderPane root;
     private final HBox topRow;
     private final HBox bottomRow;
-    private final ScoreBoard kazan;
+    private final ScoreBoard scoreBoard;
     private final PlayerPanel playerPanel;
     private final WinOverlay winOverlay;
 
@@ -28,10 +29,18 @@ public class MainView {
         this.root = new BorderPane();
         this.topRow = new HBox(10);
         this.bottomRow = new HBox(10);
-        this.kazan = new ScoreBoard(controller);
+        this.scoreBoard = new ScoreBoard(controller);
         this.playerPanel = new PlayerPanel(controller);
         this.winOverlay = new WinOverlay(controller, stage);
         buildLayout();
+        this.scene = new Scene(root, 1200, 700);
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        controller.setView(this);
+
+        // Center the stage and make it non-resizable
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.centerOnScreen();
     }
 
     private void buildLayout() {
@@ -58,11 +67,11 @@ public class MainView {
         }
         root.setBottom(bottomRow);
 
-        // Center — kazan and winOverlay
+        // Center — scoreboard and winOverlay
         StackPane centerStack = new StackPane();
         VBox centerBox = new VBox(15);
         centerBox.setAlignment(Pos.CENTER);
-        centerBox.getChildren().add(kazan.getNode());
+        centerBox.getChildren().add(scoreBoard.getNode());
         centerStack.getChildren().addAll(centerBox, winOverlay);
         StackPane.setAlignment(centerBox, Pos.CENTER);
         StackPane.setAlignment(winOverlay, Pos.CENTER);
@@ -112,18 +121,20 @@ public class MainView {
             hp.setTuzdyk(controller.getTuzdyk(1) == hp.getHoleIndex());
             hp.setDisable(currentPlayer != 0);
         }
-        kazan.setScores(controller.getKazan(0), controller.getKazan(1));
+        scoreBoard.setScores(controller.getKazan(0), controller.getKazan(1));
         playerPanel.setScores(controller.getKazan(0), controller.getKazan(1));
         playerPanel.setCurrentPlayer(currentPlayer);
 
         if (controller.isFinished()) {
             winOverlay.showResult(controller.getGameResult());
+            winOverlay.setVisible(true); // Explicitly ensure visibility
+            StackPane.setAlignment(winOverlay, Pos.CENTER); // Reinforce centering
         } else {
             winOverlay.setVisible(false);
         }
     }
 
-    public BorderPane getRoot() {
-        return root;
+    public Scene getScene() {
+        return scene;
     }
 }
